@@ -5,6 +5,7 @@ import { db } from '../../../firebase';
 import Alltickets from './Alltickets';
 import jsPDF from 'jspdf';
 import { downloadExcel } from "react-export-table-to-excel";
+import autoTable from 'jspdf-autotable';
 
 function VIP() {
     const [posts1, setPosts1] = React.useState([]);
@@ -64,8 +65,8 @@ function VIP() {
           item.type,
         ])
       );
-      doc.autoTable(columns, rows);
-      doc.save(`Mr/Miss UoN Attendance List - 2023 (VIP Tickets)`);
+      doc?.autoTable(columns, rows);
+      doc?.save(`Mr/Miss UoN Attendance List - 2023 (VIP Tickets)`);
     }
 
 
