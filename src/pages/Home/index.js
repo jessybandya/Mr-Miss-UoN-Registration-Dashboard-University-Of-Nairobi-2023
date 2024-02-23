@@ -21,96 +21,151 @@ function Home() {
   const [totalTickets, setTotalTickets] = React.useState([])
   const [ordinaryTickets, setOrdinaryTickets] = React.useState([])
   const [vipTickets, setVIPTickets] = React.useState([])
-  
-  const [totalTicketsRevenue, setTotalTicketsRevenue] = React.useState(0)
-  const [ordinaryTicketsRevenue, setOrdinaryTicketsRevenue] = React.useState(0)
-  const [vipTicketsRevenue, setVIPTicketsRevenue] = React.useState(0)
+  const [agrics, setAgrics] = React.useState([])
+  const [arts, setArts] = React.useState([])
+  const [add, setAdd] = React.useState([])
+  const [business, setBusiness] = React.useState([])
+  const [kikuyu, setKikuyu] = React.useState([])
+  const [eng, setEng] = React.useState([])
+  const [law, setLaw] = React.useState([])
+  const [health, setHealth] = React.useState([])
+  const [scie, setScie] = React.useState([])
+  const [vet, setVet] = React.useState([])
+  const [momb, setMomb] = React.useState([])
+  const [kenya, setKenya] = React.useState([])
+  const [kisumu, setKisumu] = React.useState([])
+  const [non, setNon] = React.useState([])
+
+
+
+
 
   useEffect(() => {
-    const unsubscribe = db.collection('registration').onSnapshot((snapshot) => {
-      const ticketData = snapshot.docs.map((doc) => doc.data());
-      setTotalTickets(ticketData);
+    // Replace 'http://your-api-url/fetchRegistrationData' with your actual API endpoint
+    const fetchData = async() => { 
+      
+      fetch('https://unsa-feng.uonbi.ac.ke/backend/php/getAll.php')
+      .then(response => response.json())
+      .then(data => {
+        setTotalTickets(data);
 
-      // Calculate the total amount
-      const total = ticketData.reduce((acc, doc) => acc + doc.amount, 0);
-      setTotalTicketsRevenue(total);
-    });
+        // Calculate the total amount
+        // const total = data.reduce((acc, ticket) => acc + ticket.amount, 0);
+        // setTotalTicketsRevenue(total);
+      })
+      .catch(error => {
+        console.log(error.message || 'An error occurred while fetching data.');
+      });
 
+    }
+
+    const interval = setInterval(fetchData, 2000);
+
+    // Clean up interval on component unmount
     return () => {
-      // Unsubscribe from the snapshot listener when the component unmounts
-      unsubscribe();
+      clearInterval(interval);
     };
   }, []);
 
 
 
   useEffect(() => {
-    const unsubscribe = db.collection('registration').where("type" ,"==", "Ordinary").onSnapshot((snapshot) => {
-      const ticketData = snapshot.docs.map((doc) => doc.data());
-      setOrdinaryTickets(ticketData);
+    // Replace 'http://your-api-url/fetchAllTickets' with your actual API endpoint
+    const fetchData = async() => {
+      
+      fetch('https://unsa-feng.uonbi.ac.ke/backend/php/getAll.php')
+      .then(response => response.json())
+      .then(data => {
+        // Filter ordinary tickets
+        const agricsData = data.filter(ticket => ticket.faculty === 'AGRICULTURE');
+        const artsData = data.filter(ticket => ticket.faculty === 'ART & SOCIAL SCIENCES');
+        const addData = data.filter(ticket => ticket.faculty === 'BUILT ENVIRONMENT & DESIGN');
+        const engData = data.filter(ticket => ticket.faculty === 'ENGINEERING');
+        const businessData = data.filter(ticket => ticket.faculty === 'BUSINESS & MANAGEMENT SCIENCES');
+        const kikuyuData = data.filter(ticket => ticket.faculty === 'KIKUYU CAMPUS');
+        const lawData = data.filter(ticket => ticket.faculty === 'LAW');
+        const healthData = data.filter(ticket => ticket.faculty === 'HEALTH SCIENCE');
+        const sciData = data.filter(ticket => ticket.faculty === 'SCIENCE & TECHNOLOGY');
+        const vetData = data.filter(ticket => ticket.faculty === 'VETENARY MEDICINE');
+        const mombData = data.filter(ticket => ticket.faculty === 'MOMBASA CAMPUS');        
+        const kenyaData = data.filter(ticket => ticket.faculty === 'KENYA SCIENCE');
+        const kisumuData = data.filter(ticket => ticket.faculty === 'KISUMU CAMPUS');
+        const nonStudentData = data.filter(ticket => ticket.faculty === 'N/A');
+        setAgrics(agricsData);
+        setArts(artsData)
+        setAdd(addData)
+        setEng(engData)
+        setBusiness(businessData)
+        setKikuyu(kikuyuData)
+        setLaw(lawData)
+        setHealth(healthData)
+        setScie(sciData)
+        setVet(vetData)
+        setMomb(mombData)
+        setKenya(kenyaData)
+        setKisumu(kisumuData)
+        setNon(nonStudentData)
+      })
+      .catch(error => {
+        console.log(error.message || 'An error occurred while fetching data.');
+      });
 
-      // Calculate the total amount
-      const total = ticketData.reduce((acc, doc) => acc + doc.amount, 0);
-      setOrdinaryTicketsRevenue(total);
-    });
+    }
+      const interval = setInterval(fetchData, 2000);
 
-    return () => {
-      // Unsubscribe from the snapshot listener when the component unmounts
-      unsubscribe();
-    };
+      // Clean up interval on component unmount
+      return () => {
+        clearInterval(interval);
+      };
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = db.collection('registration').where("type" ,"==", "VIP").onSnapshot((snapshot) => {
-      const ticketData = snapshot.docs.map((doc) => doc.data());
-      setVIPTickets(ticketData);
-
-      // Calculate the total amount
-      const total = ticketData.reduce((acc, doc) => acc + doc.amount, 0);
-      setVIPTicketsRevenue(total);
-    });
-
-    return () => {
-      // Unsubscribe from the snapshot listener when the component unmounts
-      unsubscribe();
-    };
-  }, []);
 
 
 
-  React.useEffect(() => {
-    db.collection('registration').where("type" ,"==", "VIP").onSnapshot((snapshot) => {
-      setVIPTickets(snapshot.docs.map((doc) => doc.data()))
-    })
-  }, [])
 
 
   return (
     <Card className='home'>
     {/** TotalCards */}
+    
       <div className='cards'>
-         <TotalCard title='Total Registered Tickets' number={totalTickets.length} icon={GroupIcon} />
-         <TotalCard title='Total Ordinary Tickets' number={ordinaryTickets.length} icon={ConfirmationNumberIcon} />
-         <TotalCard title='Total VIP Tickets' number={vipTickets.length} icon={SupervisedUserCircleIcon} />
+         <TotalCard title='TOTAL REGISTERED TICKETS' number={totalTickets.length} icon={GroupIcon} />
+         <TotalCard title='AGRICULTURE' number={agrics.length} icon={GroupIcon} />
+         <TotalCard title='ART & SOCIAL SCIENCES' number={arts.length} icon={ConfirmationNumberIcon} />
+         <TotalCard title='BUILT ENVIRONMENT & DESIGN' number={add.length} icon={SupervisedUserCircleIcon} />
+      </div>
+      
+      <div className='cards'>
+         <TotalCard title='ENGINEERING' number={eng.length} icon={SupervisedUserCircleIcon} />
+         <TotalCard title='B. & MANAGEMENT SCIENCES' number={business.length} icon={SupervisedUserCircleIcon} />
+         <TotalCard title='KIKUYU CAMPUS' number={kikuyu.length} icon={SupervisedUserCircleIcon} />
+         <TotalCard title='LAW' number={law.length} icon={SupervisedUserCircleIcon} />
       </div>
 
       <div className='cards'>
-      <RevenueCard title='Tickets Revenue' number={totalTicketsRevenue} icon={CurrencyExchangeIcon} />
-      <RevenueCard title='Ordinary Tickets Revenue' number={ordinaryTicketsRevenue} icon={CurrencyExchangeIcon} />
-      <RevenueCard title='VIP Tickets Revenue' number={vipTicketsRevenue} icon={CurrencyExchangeIcon} />
+      <TotalCard title='HEALTH SCIENCE' number={health.length} icon={SupervisedUserCircleIcon} />
+      <TotalCard title='SCIENCE & TECHNOLOGY' number={scie.length} icon={SupervisedUserCircleIcon} />
+      <TotalCard title='VETENARY MEDICINE' number={vet.length} icon={SupervisedUserCircleIcon} />
+      <TotalCard title='MOMBASA CAMPUS' number={momb.length} icon={SupervisedUserCircleIcon} />
    </div>
+
+   <div className='cards'>
+   <TotalCard title='KENYA SCIENCE' number={kenya.length} icon={SupervisedUserCircleIcon} />
+   <TotalCard title='KISUMU CAMPUS' number={kisumu.length} icon={SupervisedUserCircleIcon} />
+   <TotalCard title='NON STUDENTS' number={non.length} icon={SupervisedUserCircleIcon} />
+</div>
 
     {/** Tabs */}
     <Tabs style={{marginTop:15}} id="custom-animation" value={0}>
     <TabsHeader>
     <Tab key={0} value={0}>
-    All Tickets
+    ALL TICKETS
   </Tab>
   <Tab key={1} value={1}>
-  Ordinary Tickets
+  ORDINARY
 </Tab>
 <Tab key={2} value={2}>
-VIP Tickets
+VIP
 </Tab>
     </TabsHeader>
     <TabsBody

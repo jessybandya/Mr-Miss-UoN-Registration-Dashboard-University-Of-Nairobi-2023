@@ -52,17 +52,18 @@ body:before {
 
 @media (min-width: 768px){
   .home{
-    padding: 0px 50px 0px 50px;
+    padding: 0px 25px 0px 25px;
     background: transparent;
   }
   .cards{
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     margin-top: 10px;
   }
   .card{
-    width: 30%;
+    width: 25%;
+    gap: 5px;
     height: 110px;
     background: #fff;
     border-radius: 10px;

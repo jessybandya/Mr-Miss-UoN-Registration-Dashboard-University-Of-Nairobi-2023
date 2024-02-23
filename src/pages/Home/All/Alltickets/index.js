@@ -14,15 +14,40 @@ function Alltickets({ filteredPosts, searchTerm }) {
     const [prevPage, setPrevPage] = useState(1);
 
       const totalPages = Math.ceil(posts.length / pageSize);
+
+
+
+      
   
-       React.useEffect(() => {
-           db.collection('registration').orderBy("timestamp","asc").onSnapshot(snapshot => {
-               setPosts(snapshot.docs.map(doc => ({
-                   id: doc.id,
-                   post: doc.data(),
-               })));
-           })
-       }, []);
+      useEffect(() => {
+        // Fetch data from the server
+        const fetchData = async () => {
+        fetch('https://unsa-feng.uonbi.ac.ke/backend/php/getAll.php')
+          .then(response => response.json())
+          .then(data => {
+            // Map the fetched data to the expected format
+            const mappedPosts = data.map(post => ({
+              id: post.id, // Adjust based on the structure of your data
+              post: post, // Adjust based on the structure of your data
+            }));
+    
+            // Set the data in state
+            setPosts(mappedPosts);
+          })
+          .catch(error => {
+            // Set the error in state
+            console.log(error.message || 'An error occurred while fetching data.');
+          });
+        }
+
+          const interval = setInterval(fetchData, 2000);
+
+          // Clean up interval on component unmount
+          return () => {
+            clearInterval(interval);
+          };
+      }, []); // Empty dependency array ensures the effect runs once after the initial render
+    
   
   // Handle page change
   const handlePageChange = (event, page) => {
@@ -62,9 +87,7 @@ const getCurrentPosts = () => {
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">F. NAME</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">L. NAME</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">PHONE</TableCell>
-          <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">TICKET</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">AMOUNT(KES)</TableCell>
-          <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">ENTRY</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">E. SENT</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">REGISTERED</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">ACTIONS</TableCell>
@@ -83,7 +106,7 @@ const getCurrentPosts = () => {
                     lastName={post.lastName}
                     email={post.email}
                     phone={post.phone}
-                    checkedIn={post.checkedIn}
+                    checkedIn={post.checkeIn}
                     timestamp={post.timestamp}
                     regNo={post.regNo}
                     faculty={post.faculty}
@@ -92,14 +115,14 @@ const getCurrentPosts = () => {
                     pos={post.pos}
                     receivedEmail={post.receivedEmail}
                     type={post.type}
-                    uid={post.uid}
+                    uid={post.id}
                     cancel={post.cancel}
                     />
                   ))
   }
              </>
           ):(
-            <div style={{display:'table',margin:'auto',fontSize:18,fontWeight:'bold'}}>No member here yet!</div>
+            <div style={{display:'table',margin:'auto',fontSize:18}}>loading...</div>
           )
        ):(
         <>
@@ -115,7 +138,7 @@ const getCurrentPosts = () => {
  lastName={posts2.lastName}
  email={posts2.email}
  phone={posts2.phone}
- checkedIn={posts2.checkedIn}
+ checkedIn={posts2.checkeIn}
  timestamp={posts2.timestamp}
  regNo={posts2.regNo}
  faculty={posts2.faculty}
@@ -124,14 +147,14 @@ const getCurrentPosts = () => {
  pos={posts2.pos}
  receivedEmail={posts2.receivedEmail}
  type={posts2.type}
- uid={posts2.uid}
+ uid={posts2.id}
  cancel={posts2.cancel}
  />
  ))
                            }
            </>
          ):(
-           <><center style={{fontWeight:'bold'}}><h4>No results...</h4></center></>
+            <><center><h4>Not found...</h4></center></>
          )       
        
        }

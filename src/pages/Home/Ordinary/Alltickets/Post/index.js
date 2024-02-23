@@ -91,11 +91,8 @@ function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp,
 
   return (
         <TableRow hover role="checkbox" tabIndex={-1}>
-        <TableCell style={{fontWeight:'bold'}}> 
-        {pos}.         
-        </TableCell>
-        <TableCell align='right'>  
-        {ticketID}                
+        <TableCell> 
+        {ticketID}        
         </TableCell>
         <TableCell align='right'>
         {firstName}                   
@@ -113,16 +110,13 @@ function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp,
         {amount}                  
         </TableCell>
         <TableCell align='right'>
-        {checkedIn === false ? <ClearIcon style={{color:'#3498db', cursor: 'pointer'}} onClick={entryFun}/> : <DoneAllIcon style={{color:'#3498db'}}/>}                  
+        {checkedIn === 0 ? <ClearIcon style={{color:'#3498db', cursor: 'pointer'}} onClick={entryFun}/> : <DoneAllIcon style={{color:'#3498db'}}/>}                  
         </TableCell>
         <TableCell align='right'>
-        {receivedEmail === false ? <span style={{color:'red'}}>No</span> : <span style={{color:'#3498db'}}>Yes</span>}                  
+        {receivedEmail === 0 ? <span style={{color:'red'}}>No</span> : <span style={{color:'#3498db'}}>Yes</span>}                  
         </TableCell>
         <TableCell align='right'>
         {date.toDateString()}                 
-        </TableCell>
-        <TableCell align='right'>
-         <EditIcon onClick={() => openModal(pos)} style={{color:'#3498db', cursor: 'pointer'}}/>                
         </TableCell>
 
         <Dialog

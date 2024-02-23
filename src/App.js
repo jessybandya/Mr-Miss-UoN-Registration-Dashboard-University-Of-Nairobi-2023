@@ -10,11 +10,7 @@ function App() {
   return (
     <div>
     <Header />
-     {authId ?(
-      <Home />
-     ):(
-      <Login />
-     )}
+    <Home />
     </div>
   );
 }

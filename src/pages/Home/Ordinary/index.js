@@ -13,27 +13,51 @@ function Ordinary() {
     const [searchTerm, setSearchTerm] = React.useState('');
     const [filteredPosts, setFilteredPosts] = React.useState([]);
 
-    useEffect(() => {
-      db.collection('registration').where("type", "==", "Ordinary").orderBy("timestamp","asc").onSnapshot((snapshot) => {
-          setPosts(snapshot.docs.map((doc) => doc.data()))
-        })
-  }, [])
-  
-    React.useEffect(() => {
-      db.collection('registration').where("type", "==", "Ordinary").onSnapshot((snapshot) => {
-        setPosts1(snapshot.docs.map((doc) => doc.data()))
-      })
-  
-      if (posts1 !== undefined) {
-        const finalPosts = posts1.filter(res => {
-          return res?.ticketID?.toString()?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1
-        })
-  
-        setFilteredPosts(finalPosts)
-      }else {
-        return <div>No results3</div>
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://unsa-feng.uonbi.ac.ke/backend/php/getAll.php');
+        const jsonData = await response.json();
+        const ordinaryPosts = jsonData.filter(post => post.type === 'Ordinary');
+        setPosts(ordinaryPosts);
+      } catch (error) {
+        console.log('Error fetching data:', error);
       }
-    }, [searchTerm])
+    };
+    
+    React.useEffect(() => {
+      fetchData();
+    }, []);
+  
+  
+  
+    useEffect(() => {
+      // Fetch data from the server
+      fetch('https://unsa-feng.uonbi.ac.ke/backend/php/getAll.php')
+        .then(response => response.json())
+        .then(data => {
+          // Set the data in state
+          const ordinaryPosts = data.filter(post => post.type === 'Ordinary');
+          setPosts1(ordinaryPosts);
+          // Filter posts immediately after getting data
+          filterPosts(ordinaryPosts, searchTerm);
+        })
+        .catch(error => {
+          // Set the error in state
+          console.log(error.message || 'An error occurred while fetching data.');
+        });
+    }, []); // Empty dependency array ensures the effect runs once after the initial render
+  
+  
+    const filterPosts = (data, searchTerm) => {
+      if (data && data.length > 0) {
+        const finalPosts = data.filter((res) => {
+          return res?.ticketID?.toString()?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+        });
+        setFilteredPosts(finalPosts);
+      } else {
+        setFilteredPosts([]);
+      }
+    };
   
     const updateSearchResults = (e) => {
       setSearchTerm(e.target.value)

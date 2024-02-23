@@ -12,7 +12,7 @@ function TotalCard({ title, number, icon }) {
   return (
     <div className='card'>
        <div className='card-left'>
-          <h3><i>{title}</i></h3>
+          <i style={{fontSize:13}}>{title}</i>
           <p style={{color:'#3498db'}}>{numberWithCommas(number)}</p>
        </div>
        <div className='card-right'>

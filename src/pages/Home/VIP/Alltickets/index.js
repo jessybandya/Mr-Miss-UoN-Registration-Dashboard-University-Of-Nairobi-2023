@@ -15,14 +15,37 @@ function Alltickets({ filteredPosts, searchTerm }) {
 
       const totalPages = Math.ceil(posts.length / pageSize);
   
-       React.useEffect(() => {
-           db.collection('registration').where("type", "==", "VIP").orderBy("timestamp","asc").onSnapshot(snapshot => {
-               setPosts(snapshot.docs.map(doc => ({
-                   id: doc.id,
-                   post: doc.data(),
-               })));
-           })
-       }, []);
+      useEffect(() => {
+        // Fetch data from the server
+        const fetchData = async () => {
+        fetch('https://unsa-feng.uonbi.ac.ke/backend/php/getAll.php')
+          .then(response => response.json())
+          .then(data => {
+        // Filter posts based on type "Ordinary"
+        const ordinaryPosts = data.filter(post => post.type === 'VIP');
+
+        // Map the filtered data to the expected format
+        const mappedPosts = ordinaryPosts.map(post => ({
+          id: post.id, // Adjust based on the structure of your data
+          post: post, // Adjust based on the structure of your data
+        }));
+
+        // Set the data in state
+        setPosts(mappedPosts);
+          })
+          .catch(error => {
+            // Set the error in state
+            console.log(error.message || 'An error occurred while fetching data.');
+          });
+        }
+
+          const interval = setInterval(fetchData, 2000);
+
+          // Clean up interval on component unmount
+          return () => {
+            clearInterval(interval);
+          };
+      }, []); // Empty dependency array ensures the effect runs once after the initial render
   
   // Handle page change
   const handlePageChange = (event, page) => {
@@ -57,8 +80,7 @@ const getCurrentPosts = () => {
       <Table stickyHeader aria-label="sticky table">
         <TableHead sx={{ display: "table-header-group" }}>
           <TableRow>
-          <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}}>POS</TableCell>
-          <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">T. ID</TableCell>
+          <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}}>T. ID</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">F. NAME</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">L. NAME</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">PHONE</TableCell>
@@ -67,7 +89,6 @@ const getCurrentPosts = () => {
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">ENTRY</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">E. SENT</TableCell>
           <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">REGISTERED</TableCell>
-          <TableCell style={{minWidth:100,fontSize:13,backgroundColor: "",fontWeight:"900",borderBottom: "2px solid #3498db",color:"#3498db"}} align="right">ACTIONS</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -83,7 +104,7 @@ const getCurrentPosts = () => {
                     lastName={post.lastName}
                     email={post.email}
                     phone={post.phone}
-                    checkedIn={post.checkedIn}
+                    checkedIn={post.checkeIn}
                     timestamp={post.timestamp}
                     regNo={post.regNo}
                     faculty={post.faculty}
@@ -99,7 +120,7 @@ const getCurrentPosts = () => {
   }
              </>
           ):(
-            <div style={{display:'table',margin:'auto',fontSize:18,fontWeight:'bold'}}>No member here yet!</div>
+            <div style={{display:'table',margin:'auto',fontSize:18}}>loading...</div>
           )
        ):(
         <>
@@ -115,7 +136,7 @@ const getCurrentPosts = () => {
  lastName={posts2.lastName}
  email={posts2.email}
  phone={posts2.phone}
- checkedIn={posts2.checkedIn}
+ checkedIn={posts2.checkeIn}
  timestamp={posts2.timestamp}
  regNo={posts2.regNo}
  faculty={posts2.faculty}
@@ -131,7 +152,7 @@ const getCurrentPosts = () => {
                            }
            </>
          ):(
-           <><center style={{fontWeight:'bold'}}><h4>No results...</h4></center></>
+           <><center><h4>Not found...</h4></center></>
          )       
        
        }

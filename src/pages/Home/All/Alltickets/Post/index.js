@@ -16,6 +16,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import EditIcon from '@mui/icons-material/Edit';
 import { ToastContainer, toast } from 'react-toastify';
 import { db } from '../../../../../firebase';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp, regNo, faculty, country, ticketID, pos, receivedEmail, type, uid, cancel }) {
   const [position, setPosition] = useState('')
@@ -33,39 +34,116 @@ function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp,
     setOpen(true)
   }
 
-  const updateFun = () => {
+  const updateFun = async(id) => {
     setLoading(true)
-    db.collection('registration').doc(uid).update({
+    const formData = {
+      id,
+      receivedEmail: receivedEmail,
+      checkeIn:checkedIn,
       pos: position
-    })
-    toast.success('Position updated successfully', {
-      position: "top-center",
-      })
-      setLoading(false)
+    }
+
+    try {
+      await fetch('https://unsa-feng.uonbi.ac.ke/backend/php/update.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      toast.success(`Update to ${firstName} ${lastName}`, {
+        position: "top-center",
+        })
+        setLoading(false)
+    } catch (error) {
+      console.log(error.message || 'An error occurred while updating emailSent.');
+    }
   }
 
-  const entryFun = () => {
-    setLoading(true)
-    db.collection('registration').doc(uid).update({
-      checkedIn: true
-    })
-    toast.success(`Entry updated successfully for ${firstName} ${lastName}`, {
-      position: "top-center",
-      })
-      setLoading(false)
+  const deleteUser = async (id) => {
+    if (window.confirm(`Are you sure you want to delete ${firstName} ${lastName}?`)) {
+      setLoading(true);
+      const formData = {
+        id
+      };
+  
+      try {
+        await fetch('https://unsa-feng.uonbi.ac.ke/backend/php/delete.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        toast.success(`Deleted ${firstName} ${lastName}`, {
+          position: 'top-center',
+        });
+        setLoading(false);
+      } catch (error) {
+        console.log(error.message || 'An error occurred while updating emailSent.');
+      }
+    }
+  };
+  
+
+  const entryFun = async(id) => {
+
+    
+    const formData = {
+      id,
+      receivedEmail: receivedEmail,
+      checkeIn: 1,
+      pos: pos
+    }
+
+    try {
+      await fetch('https://unsa-feng.uonbi.ac.ke/backend/php/update.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      toast.success(`Entry updated successfully for ${firstName} ${lastName}`, {
+        position: "top-center",
+        })
+        setLoading(false)
+    } catch (error) {
+      console.log(error.message || 'An error occurred while updating emailSent.');
+    }
+
   }
 
-  const sendEmail = () => {
-    setLoading(true)
-    db.collection('registration').doc(uid).update({
-      receivedEmail: true
-    })
-    sendViaEmail()
-    toast.success(`Email has been sent to ${firstName} - Position: ${pos}`, {
-      position: "top-center",
-      })
-      setLoading(false)
-  }
+
+
+  const updateEmailSent = async (id) => {
+
+    const formData = {
+      id,
+      receivedEmail: 0,
+      checkeIn:checkedIn,
+      pos: pos
+    }
+
+    try {
+      await fetch('https://unsa-feng.uonbi.ac.ke/backend/php/update.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      sendViaEmail()
+      toast.success(`Email has been sent to ${firstName} - Position: ${pos}`, {
+        position: "top-center",
+        })
+        setLoading(false)
+    } catch (error) {
+      console.log(error.message || 'An error occurred while updating emailSent.');
+    }
+  };
 
 
 
@@ -78,10 +156,10 @@ function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp,
     var date = new Date(+d);
     const cost = amount === 100 ? "Ordinary" : "VIP";
     const subject = encodeURIComponent(
-      `Mr/Miss UoN 2023 Ticket Number: ${ticketID} - ${firstName} ${lastName}`
+      `Mr/Miss UoN 2023 Ticket Update`
     );
     const body = encodeURIComponent(
-      `Greetings ${firstName}, hope this mail finds you in good health. We've sent this mail to confirm to you that the registration for Mr/Miss UoN 2023 is a success. Below are the details for your booking.\n\nTicket Number: ${ticketID}\nList Position: ${pos}\nFirst Name: ${firstName}\nLast Name: ${lastName}\nEmail: ${email}\nRegistration No.: ${regNo}\nPhone No.: ${phone}\nFaculty: ${faculty}\nCountry: ${country}\nAmount(KES): ${amount}.00\nType: ${cost}\nDate Registered: ${date.toDateString()}\n\nRegards,\nUwimana Jessy Bandya\nInternational Rep. Faculty Of Engineering.`
+      `Greetings ${firstName}, hope this mail finds you well. I've sent this email to notify you that the ticket: ${ticketID} you purchased for Mr/Miss UoN 2023 has been cancelled and provided you with an updated one. I've sent a new ticket to sms via phone number: ${phone} and Email: ${email}.\n\nWe're migrating our tickets from the initial system to a new one, since you don't have to pay twice the ticket generated show 0.00 amount paid which is okay and the ticket still valid.\nThank you for understanding.\n\nIn case of any queries, kindly reach out to me via: \nRole: Support Representative/Int'l Students' Rep. Faculty Of Engineering\nEmail 1: jessy.bandya5@gmail.com\nEmail 2:bandya@students.uonbi.ac.ke\nPhone Number: +254746749307`
     );
 
     const mailtoLink = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
@@ -95,7 +173,7 @@ function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp,
         {pos}.         
         </TableCell>
         <TableCell align='right'>  
-        {ticketID}                
+        {email}                
         </TableCell>
         <TableCell align='right'>
         {firstName}                   
@@ -107,21 +185,16 @@ function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp,
         {phone}                   
         </TableCell>
         <TableCell align='right'>
-        {type}                  
-        </TableCell>
-        <TableCell align='right'>
         {amount}                  
         </TableCell>
         <TableCell align='right'>
-        {checkedIn === false ? <ClearIcon style={{color:'#3498db', cursor: 'pointer'}} onClick={entryFun}/> : <DoneAllIcon style={{color:'#3498db'}}/>}                  
-        </TableCell>
-        <TableCell align='right'>
-        {receivedEmail === false ? <span style={{color:'red'}}>No</span> : <span style={{color:'#3498db'}}>Yes</span>}                  
+        {receivedEmail === 0 ? <span style={{color:'red'}}>No</span> : <span style={{color:'#3498db'}}>Yes</span>}                  
         </TableCell>
         <TableCell align='right'>
         {date.toDateString()}                 
         </TableCell>
         <TableCell align='right'>
+         <DeleteForeverIcon onClick={() => deleteUser(uid)} style={{color:'#3498db', cursor: 'pointer', marginLeft:5}}/>
          <EditIcon onClick={() => openModal(pos)} style={{color:'#3498db', cursor: 'pointer'}}/>                
         </TableCell>
 
@@ -142,12 +215,12 @@ function Post({ amount, firstName, lastName, email, phone, checkedIn, timestamp,
         color='blue'
         onChange={(e) => setPosition(e.target.value)}
         label="Position" size="lg" />
-        <Button onClick={updateFun} color='blue' variant="gradient"  fullWidth>
+        <Button onClick={() => updateFun(uid)} color='blue' variant="gradient"  fullWidth>
         {loading ? 'Updating...' : 'Update'}
       </Button>
       </CardBody>
       <CardFooter className="pt-0">
-        <Button onClick={sendEmail} color='red' variant="gradient"  fullWidth>
+        <Button onClick={() => updateEmailSent(uid)} color='red' variant="gradient"  fullWidth>
           Send Email
         </Button>
 
